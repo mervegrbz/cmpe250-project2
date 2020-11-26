@@ -35,7 +35,7 @@ int findIndex(vector<Character> *community, string name)
             }
         }
     }
-    cout << "olumler boyumuzu asti" << endl;
+    // cout << "olumler boyumuzu asti" << endl;
     return -1;
 }
 string print(Character a, int index)
@@ -67,7 +67,7 @@ vector<Character> reversesort(vector<Character> com, string arr[5])
 
 int main(int argc, char *argv[])
 {
-    cout << "hii" << endl;
+
     ifstream file;
     ofstream myfile;
     string com1[5];
@@ -75,12 +75,10 @@ int main(int argc, char *argv[])
     vector<Character> community1;
     vector<Character> community2;
 
-    // vector<Character> com2;
-    myfile.open("example.txt");
-    file.open("./testcases/inputs/input_7.txt");
+    myfile.open("output.txt");
+    file.open("input_7.txt");
     int numberOfAttack;
     file >> numberOfAttack;
-    string line;
     for (int i = 0; i < 10; i++)
     {
         string name;
@@ -90,29 +88,34 @@ int main(int argc, char *argv[])
         int initialHealth;
 
         file >> name >> type >> attackPoint >> defensePoint >> initialHealth;
-        Character newChar(name, type, attackPoint, defensePoint, initialHealth, numberOfAttack);
+        
         if (i < 5)
         {
-            // com1[i] = name;
             com1[i] = name;
-            community1.push_back(newChar);
+            community1.push_back( Character(name, type, attackPoint, defensePoint, initialHealth, numberOfAttack));
         }
         else
         {
             com2[i % 5] = name;
-            community2.push_back(newChar);
+            community2.push_back( Character(name, type, attackPoint, defensePoint, initialHealth, numberOfAttack));
         }
     }
 
     sort(community1.begin(), community1.end());
     sort(community2.begin(), community2.end());
-    stack<Character *> deadChar1;
-    stack<Character *> deadChar2;
+    int deadNum1 = 0;
+    int deadNum2 = 0;
     bool isDeadHobbit1 = false;
     bool isDeadHobbit2 = false;
+    Character *dead1 = NULL;
+    Character *dead2 = NULL;
 
     for (int i = 0; i < numberOfAttack; i++)
     {
+        if(i==65){
+            cout<<i<<endl;
+        }
+        cout<<i<<endl;
         string attacker;
         string defender;
         string typeOfAttack;
@@ -142,40 +145,56 @@ int main(int argc, char *argv[])
                 attack->remainingHealth /= 2;
                 attack->nRoundsSinceSpecial = i;
             }
-            if (attack->type == "Dwarfs" && i - attack->nRoundsSinceSpecial > 20)
+            if (attack->type == "Dwarfs" && i - attack->nRoundsSinceSpecial > 20 )
+
             {
 
                 defend->remainingHealth = defend->remainingHealth - damage > 0 ? defend->remainingHealth - damage : 0;
                 attack->nRoundsSinceSpecial = i;
             }
-            if (attack->type == "Wizards" && i - attack->nRoundsSinceSpecial > 50)
+            if (attack->type == "Wizards" && i - attack->nRoundsSinceSpecial > 50 )
             {
+
                 Character *lastDead = NULL;
-                if (i % 2 == 0 && deadChar1.size() !=0)
+                if (i % 2 == 0 && dead1!=NULL)
                 {
-                    lastDead = deadChar1.top();
-                    deadChar1.pop();
+                    lastDead = dead1;
+                   
+                    if(!(dead1->isAlive))
+                    deadNum1--;
                 }
-                if (i % 2 == 1&& deadChar2.size() !=0)
+                if (i % 2 == 1 && dead2!=NULL)
                 {
-                    lastDead = deadChar2.top();
-                    deadChar2.pop();
+                    lastDead = dead2;
+                   
+                    if(!(dead2->isAlive))
+                    deadNum2--;
                 }
-                if (lastDead != NULL)
+                if (lastDead!=NULL)
                 {
+
                     lastDead->remainingHealth = lastDead->healthHistory[0];
                     lastDead->isAlive = true;
                     attack->nRoundsSinceSpecial = i;
                 }
+
             }
         }
         defend->isAlive = defend->remainingHealth > 0;
-        if (!defend->isAlive)
+
+        if (!(defend->isAlive))
         {
+
             if (i % 2 == 0)
-                deadChar2.push(defend);
+            {
+                deadNum2++;
+                dead2 = defend;
+            }
             if (i % 2 == 1)
-                deadChar1.push(defend);
+            {
+                deadNum1++;
+                dead1 = defend;
+            }
         }
         for (int k = 0; k < 5; k++)
         {
@@ -190,20 +209,20 @@ int main(int argc, char *argv[])
             if (community2[k].type == "Hobbit" && !community2[k].isAlive)
                 isDeadHobbit2 == true;
         }
-        if (deadChar1.size() >= 4 || isDeadHobbit1 || deadChar2.size() >= 4 || isDeadHobbit2 || i == numberOfAttack - 1)
+        if (deadNum1 >= 4 || isDeadHobbit1 || deadNum2 >= 4 || isDeadHobbit2 || i == numberOfAttack - 1)
         {
             community2 = reversesort(community2, com2);
             community1 = reversesort(community1, com1);
             string winner = "";
-            cout << deadChar1.size();
-            winner = (deadChar1.size() >= 4 || isDeadHobbit1) ? "Community-2" : " ";
-            winner = (deadChar2.size() >= 4 || isDeadHobbit2) ? "Community-1" : " ";
-            if(i == numberOfAttack - 1&&winner==" ")
-            winner ="Draw";
+
+            winner = (deadNum1 >= 4 || isDeadHobbit1) ? "Community-2" : " ";
+            winner = (deadNum2 >= 4 || isDeadHobbit2) ? "Community-1" : " ";
+            if (i == numberOfAttack - 1 && winner == " ")
+                winner = "Draw";
 
             myfile << winner << "\n";
             myfile << i + 1 << "\n";
-            myfile << deadChar1.size() + deadChar2.size() << "\n";
+            myfile << deadNum1 + deadNum2 << "\n";
             for (int k = 0; k < 5; k++)
             {
                 myfile << print(community1[k], i) << "\n";
