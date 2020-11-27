@@ -6,6 +6,7 @@
 #include <algorithm>
 
 using namespace std;
+//function gives the index of the defender or attacker in community arrays and return it
 int findIndex(vector<Character> *community, string name)
 {
     for (int i = 0; i < 5; i++)
@@ -38,6 +39,7 @@ int findIndex(vector<Character> *community, string name)
     // cout << "olumler boyumuzu asti" << endl;
     return -1;
 }
+//it prints the results according to wanted order
 string print(Character a, int index)
 {
     string result = a.name + " ";
@@ -75,10 +77,11 @@ int main(int argc, char *argv[])
     vector<Character> community1;
     vector<Character> community2;
 
-    myfile.open("output.txt");
-    file.open("input_7.txt");
+    file.open(argv[1]);
+    myfile.open(argv[2]);
     int numberOfAttack;
     file >> numberOfAttack;
+    //this loop creates community arrays
     for (int i = 0; i < 10; i++)
     {
         string name;
@@ -100,7 +103,7 @@ int main(int argc, char *argv[])
             community2.push_back( Character(name, type, attackPoint, defensePoint, initialHealth, numberOfAttack));
         }
     }
-
+//sorts arrays 
     sort(community1.begin(), community1.end());
     sort(community2.begin(), community2.end());
     int deadNum1 = 0;
@@ -112,10 +115,7 @@ int main(int argc, char *argv[])
 
     for (int i = 0; i < numberOfAttack; i++)
     {
-        if(i==65){
-            cout<<i<<endl;
-        }
-        cout<<i<<endl;
+        //find defender and attacker 
         string attacker;
         string defender;
         string typeOfAttack;
@@ -124,6 +124,7 @@ int main(int argc, char *argv[])
         vector<Character> *defenderSide = i % 2 == 1 ? &community1 : &community2;
         Character *attack = &(*attackerSide)[findIndex(attackerSide, attacker)];
         Character *defend = &(*defenderSide)[findIndex(defenderSide, defender)];
+        //find damage
         int damage = attack->attack - defend->defense;
         if (damage < 0)
             damage = 0;
@@ -160,15 +161,21 @@ int main(int argc, char *argv[])
                 {
                     lastDead = dead1;
                    
-                    if(!(dead1->isAlive))
+                    if(!(dead1->isAlive)){
+                    lastDead->nRoundsSinceSpecial=i;
                     deadNum1--;
+
+                    }
                 }
                 if (i % 2 == 1 && dead2!=NULL)
                 {
                     lastDead = dead2;
                    
-                    if(!(dead2->isAlive))
+                    if(!(dead2->isAlive)){
+                    lastDead->nRoundsSinceSpecial=i;
+
                     deadNum2--;
+                    }
                 }
                 if (lastDead!=NULL)
                 {
@@ -233,6 +240,7 @@ int main(int argc, char *argv[])
             }
             break;
         }
+    
     }
     myfile.close();
     file.close();
